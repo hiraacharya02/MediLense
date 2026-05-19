@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LearnLense — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="dashboard">
+
+  <!-- ── Navigation ─────────────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="nav__inner">
+
+      <a href="index.html" class="nav__logo">
+        <span class="nav__logo-icon">⚕</span>
+        <span class="nav__logo-name">LearnLense</span>
+      </a>
+
+      <div class="nav__center">
+        <span class="trust-badge">
+          <span class="badge-dot"></span>
+          Verified medical sources only
+        </span>
+      </div>
+
+      <div class="nav__right">
+        <span id="nav-streak" class="nav-streak" hidden></span>
+        <div class="nav-user">
+          <span id="nav-username" class="nav-user__name">Student</span>
+          <button class="btn btn--ghost btn--sm" onclick="handleLogout()">Log out</button>
+        </div>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- ── Page body ──────────────────────────────────────────────────── -->
+  <div class="page-body">
+
+    <!-- Welcome -->
+    <header class="welcome-section">
+      <h1 class="welcome-section__heading">
+        <span id="greeting-text">Good morning</span>,
+        <span id="welcome-name">Student</span>
+      </h1>
+      <p class="welcome-section__subtitle">
+        Enter a topic, choose your learning style, and let the AI guide you
+        through trusted medical content.
+      </p>
+    </header>
+
+    <!-- Stats row -->
+    <section class="stats-row" aria-label="Study statistics">
+
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--blue">🔬</div>
+        <div class="stat-card__body">
+          <div id="stat-topics" class="stat-card__value">0</div>
+          <div class="stat-card__label">Topics studied</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--teal">⚡</div>
+        <div class="stat-card__body">
+          <div id="stat-sessions" class="stat-card__value">0</div>
+          <div class="stat-card__label">Sessions today</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--green">🔥</div>
+        <div class="stat-card__body">
+          <div id="stat-streak" class="stat-card__value">0</div>
+          <div class="stat-card__label">Day streak</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--violet">🎯</div>
+        <div class="stat-card__body">
+          <div id="stat-mode" class="stat-card__value">Visual</div>
+          <div class="stat-card__label">Current mode</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── Core learning tool ──────────────────────────────────────── -->
+    <section class="learn-tool" aria-label="Learning tool">
+
+      <!-- Step guide -->
+      <ol class="step-guide" aria-label="How to use">
+        <li class="step-guide__item">
+          <span class="step-guide__number">1</span>
+          <span>Enter a medical topic</span>
+        </li>
+        <li class="step-guide__divider" aria-hidden="true">→</li>
+        <li class="step-guide__item">
+          <span class="step-guide__number">2</span>
+          <span>Choose your learning style</span>
+        </li>
+        <li class="step-guide__divider" aria-hidden="true">→</li>
+        <li class="step-guide__item">
+          <span class="step-guide__number">3</span>
+          <span>Click Learn</span>
+        </li>
+        <li class="step-guide__divider" aria-hidden="true">→</li>
+        <li class="step-guide__item">
+          <span class="step-guide__number">4</span>
+          <span>Study &amp; explore</span>
+        </li>
+      </ol>
+
+      <!-- Search bar -->
+      <div class="search-bar">
+        <input
+          id="topic-input"
+          class="search-input"
+          type="text"
+          placeholder="e.g. cardiac action potential, immune response, renal physiology…"
+          autocomplete="off"
+          onkeydown="if(event.key==='Enter') handleLearnClick()"
+        />
+        <button id="learn-btn" class="btn btn--primary btn--learn" onclick="handleLearnClick()">
+          🎓 Learn
+        </button>
+      </div>
+
+      <!-- Mode selector -->
+      <div class="mode-selector" role="tablist" aria-label="Learning styles">
+
+        <button id="mode-btn-visual"      class="mode-btn" role="tab" aria-selected="false" onclick="setMode('visual')">
+          <span class="mode-btn__icon">🎨</span>
+          <span class="mode-btn__label">Visual</span>
+          <span class="mode-btn__hint">Diagrams &amp; concepts</span>
+        </button>
+
+        <button id="mode-btn-auditory"    class="mode-btn" role="tab" aria-selected="false" onclick="setMode('auditory')">
+          <span class="mode-btn__icon">🎧</span>
+          <span class="mode-btn__label">Auditory</span>
+          <span class="mode-btn__hint">Watch &amp; listen</span>
+        </button>
+
+        <button id="mode-btn-reading"     class="mode-btn" role="tab" aria-selected="false" onclick="setMode('reading')">
+          <span class="mode-btn__icon">📖</span>
+          <span class="mode-btn__label">Reading</span>
+          <span class="mode-btn__hint">Articles &amp; texts</span>
+        </button>
+
+        <button id="mode-btn-kinesthetic" class="mode-btn" role="tab" aria-selected="false" onclick="setMode('kinesthetic')">
+          <span class="mode-btn__icon">⚙️</span>
+          <span class="mode-btn__label">Kinesthetic</span>
+          <span class="mode-btn__hint">Learn by doing</span>
+        </button>
+
+      </div>
+
+      <!-- Output panel -->
+      <div id="output-panel" class="output-panel" role="region" aria-label="Learning content">
+        <div class="output-placeholder">
+          <span class="output-placeholder__icon">🔬</span>
+          <p>Enter a medical topic and choose your learning style to begin.</p>
+        </div>
+      </div>
+
+      <!-- Chat panel -->
+      <div id="chat-panel" class="chat-panel" hidden>
+        <div class="chat-panel__header">
+          <span class="chat-panel__pulse" aria-hidden="true"></span>
+          AI Tutor — ask a follow-up question
+        </div>
+        <div id="chat-messages" class="chat-messages" aria-live="polite"></div>
+        <div class="chat-input-row">
+          <input
+            id="chat-input"
+            class="chat-input"
+            type="text"
+            placeholder="Ask something deeper about this topic…"
+            onkeydown="if(event.key==='Enter') handleChatSend()"
+          />
+          <button class="chat-send-btn" onclick="handleChatSend()">↗</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── Recent topics ───────────────────────────────────────────── -->
+    <section id="recent-section" class="recent-section" hidden aria-label="Recent topics">
+
+      <div class="recent-section__header">
+        <h2 class="recent-section__title">Recent Topics</h2>
+        <button class="recent-section__clear-btn" onclick="clearRecentTopics()">
+          Clear history
+        </button>
+      </div>
+
+      <div id="recent-topics-grid" class="recent-topics-grid"></div>
+
+    </section>
+
+  </div><!-- end .page-body -->
+
+  <script src="script.js"></script>
+</body>
+</html>

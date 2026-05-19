@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LearnLense — Log in or Sign up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="login">
+
+  <!-- Back link -->
+  <a href="index.html" class="login-back-link">← Back to home</a>
+
+  <div class="login-page">
+
+    <!-- Left panel — branding -->
+    <div class="login-brand">
+      <div class="login-brand__inner">
+
+        <a href="index.html" class="nav__logo login-brand__logo">
+          <span class="nav__logo-icon">⚕</span>
+          <span class="nav__logo-name">LearnLense</span>
+        </a>
+
+        <blockquote class="login-brand__quote">
+          "The secret of getting ahead is getting started."
+        </blockquote>
+
+        <div class="login-brand__features">
+          <div class="login-brand__feature">
+            <span class="login-brand__feature-icon">🎨</span>
+            <span>Visual, auditory, reading &amp; kinesthetic modes</span>
+          </div>
+          <div class="login-brand__feature">
+            <span class="login-brand__feature-icon">⚕</span>
+            <span>Trusted medical sources only</span>
+          </div>
+          <div class="login-brand__feature">
+            <span class="login-brand__feature-icon">🤖</span>
+            <span>AI tutor for follow-up questions</span>
+          </div>
+          <div class="login-brand__feature">
+            <span class="login-brand__feature-icon">🔥</span>
+            <span>Track your streaks and progress</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right panel — form -->
+    <div class="login-form-panel">
+      <div class="login-card">
+
+        <!-- Tab switcher -->
+        <div class="auth-tabs">
+          <button
+            id="tab-login"
+            class="auth-tab auth-tab--active"
+            onclick="switchAuthTab('login')"
+          >
+            Log in
+          </button>
+          <button
+            id="tab-signup"
+            class="auth-tab"
+            onclick="switchAuthTab('signup')"
+          >
+            Sign up
+          </button>
+        </div>
+
+        <!-- ── Log in form ─────────────────────────────────────────── -->
+        <div id="form-login" class="auth-form">
+          <h2 class="auth-form__heading">Welcome back</h2>
+          <p class="auth-form__sub">Enter your credentials to continue studying.</p>
+
+          <div id="login-error" class="auth-error" hidden></div>
+
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email address</label>
+            <input
+              id="login-email"
+              class="form-input"
+              type="email"
+              placeholder="you@university.edu"
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <input
+              id="login-password"
+              class="form-input"
+              type="password"
+              placeholder="Your password"
+              autocomplete="current-password"
+              onkeydown="if(event.key==='Enter') handleLogin()"
+            />
+          </div>
+
+          <button class="btn btn--primary btn--full" onclick="handleLogin()">
+            Log in →
+          </button>
+
+          <p class="auth-form__switch">
+            Don't have an account?
+            <button class="auth-form__switch-link" onclick="switchAuthTab('signup')">
+              Sign up free
+            </button>
+          </p>
+        </div>
+
+        <!-- ── Sign up form ────────────────────────────────────────── -->
+        <div id="form-signup" class="auth-form" hidden>
+          <h2 class="auth-form__heading">Create your account</h2>
+          <p class="auth-form__sub">Free forever. No credit card required.</p>
+
+          <div id="signup-error" class="auth-error" hidden></div>
+
+          <div class="form-group">
+            <label class="form-label" for="signup-name">Full name</label>
+            <input
+              id="signup-name"
+              class="form-input"
+              type="text"
+              placeholder="Your name"
+              autocomplete="name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="signup-email">Email address</label>
+            <input
+              id="signup-email"
+              class="form-input"
+              type="email"
+              placeholder="you@university.edu"
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="signup-password">Password</label>
+            <input
+              id="signup-password"
+              class="form-input"
+              type="password"
+              placeholder="At least 6 characters"
+              autocomplete="new-password"
+              onkeydown="if(event.key==='Enter') handleSignup()"
+            />
+          </div>
+
+          <button class="btn btn--primary btn--full" onclick="handleSignup()">
+            Create account →
+          </button>
+
+          <p class="auth-form__switch">
+            Already have an account?
+            <button class="auth-form__switch-link" onclick="switchAuthTab('login')">
+              Log in
+            </button>
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LearnLense — AI Medical Learning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="landing">
+
+  <!-- ── Nav ────────────────────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">
+        <span class="nav__logo-icon">⚕</span>
+        <span class="nav__logo-name">LearnLense</span>
+      </a>
+      <div class="nav__links">
+        <a href="#features" class="nav__link">Features</a>
+        <a href="#how-it-works" class="nav__link">How it works</a>
+        <a href="login.html" class="btn btn--ghost btn--sm">Log in</a>
+        <a href="login.html?mode=signup" class="btn btn--primary btn--sm">Get started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ───────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero__inner">
+
+      <div class="hero__badge">
+        <span class="badge-dot"></span>
+        Verified medical sources only — no internet noise
+      </div>
+
+      <h1 class="hero__heading">
+        Learn medicine<br />
+        <span class="hero__heading-accent">the way your brain works</span>
+      </h1>
+
+      <p class="hero__subtitle">
+        LearnLense delivers AI-powered medical content tailored to your personal
+        learning style — visual, auditory, reading, or kinesthetic — sourced
+        exclusively from trusted clinical material.
+      </p>
+
+      <div class="hero__ctas">
+        <a href="login.html?mode=signup" class="btn btn--primary btn--lg">
+          Start learning free →
+        </a>
+        <a href="#how-it-works" class="btn btn--outline btn--lg">
+          See how it works
+        </a>
+      </div>
+
+      <!-- Floating mode cards -->
+      <div class="hero__mode-cards" aria-hidden="true">
+        <div class="mode-preview mode-preview--visual">
+          <span class="mode-preview__icon">🎨</span>
+          <span class="mode-preview__label">Visual</span>
+        </div>
+        <div class="mode-preview mode-preview--auditory">
+          <span class="mode-preview__icon">🎧</span>
+          <span class="mode-preview__label">Auditory</span>
+        </div>
+        <div class="mode-preview mode-preview--reading">
+          <span class="mode-preview__icon">📖</span>
+          <span class="mode-preview__label">Reading</span>
+        </div>
+        <div class="mode-preview mode-preview--kinesthetic">
+          <span class="mode-preview__icon">⚙️</span>
+          <span class="mode-preview__label">Kinesthetic</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Trust bar ──────────────────────────────────────────────────── -->
+  <div class="trust-bar">
+    <div class="trust-bar__inner">
+      <span class="trust-bar__item">✓ Peer-reviewed sources</span>
+      <span class="trust-bar__sep">·</span>
+      <span class="trust-bar__item">✓ Clinical guidelines</span>
+      <span class="trust-bar__sep">·</span>
+      <span class="trust-bar__item">✓ No misinformation</span>
+      <span class="trust-bar__sep">·</span>
+      <span class="trust-bar__item">✓ Built for medical students</span>
+    </div>
+  </div>
+
+  <!-- ── Features ───────────────────────────────────────────────────── -->
+  <section class="features" id="features">
+    <div class="section-inner">
+
+      <div class="section-label">What makes us different</div>
+      <h2 class="section-heading">One tool, four ways to learn</h2>
+      <p class="section-subtitle">
+        Every student absorbs information differently. LearnLense adapts the same
+        medical topic into four completely different formats — you pick the one that
+        clicks for you.
+      </p>
+
+      <div class="features-grid">
+
+        <div class="feature-card feature-card--visual">
+          <div class="feature-card__icon">🎨</div>
+          <h3 class="feature-card__title">Visual</h3>
+          <p class="feature-card__desc">
+            Structured breakdowns, concept diagrams, highlighted key terms, and
+            memorable analogies that turn complex physiology into clear mental models.
+          </p>
+        </div>
+
+        <div class="feature-card feature-card--auditory">
+          <div class="feature-card__icon">🎧</div>
+          <h3 class="feature-card__title">Auditory</h3>
+          <p class="feature-card__desc">
+            Curated YouTube videos from channels like Osmosis, Ninja Nerd, and Khan
+            Academy Medicine — with a listening guide so you know what to focus on.
+          </p>
+        </div>
+
+        <div class="feature-card feature-card--reading">
+          <div class="feature-card__icon">📖</div>
+          <h3 class="feature-card__title">Reading / Writing</h3>
+          <p class="feature-card__desc">
+            A 350-word clinical article on your topic, plus three recommended medical
+            textbooks and resources to take your reading further.
+          </p>
+        </div>
+
+        <div class="feature-card feature-card--kinesthetic">
+          <div class="feature-card__icon">⚙️</div>
+          <h3 class="feature-card__title">Kinesthetic</h3>
+          <p class="feature-card__desc">
+            Four hands-on exercises — clinical reasoning, labelling, recall challenges —
+            so you learn by doing rather than just reading.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How it works ───────────────────────────────────────────────── -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="section-inner">
+
+      <div class="section-label">Simple by design</div>
+      <h2 class="section-heading">Three steps to understand anything</h2>
+
+      <div class="steps">
+
+        <div class="step">
+          <div class="step__number">01</div>
+          <div class="step__body">
+            <h3 class="step__title">Enter a medical topic</h3>
+            <p class="step__desc">
+              Type any concept — from cardiac action potentials to renal physiology
+              to drug mechanisms. The more specific, the better.
+            </p>
+          </div>
+        </div>
+
+        <div class="step__connector" aria-hidden="true">→</div>
+
+        <div class="step">
+          <div class="step__number">02</div>
+          <div class="step__body">
+            <h3 class="step__title">Choose your learning style</h3>
+            <p class="step__desc">
+              Pick Visual, Auditory, Reading, or Kinesthetic. You can switch modes
+              on the same topic to get multiple perspectives.
+            </p>
+          </div>
+        </div>
+
+        <div class="step__connector" aria-hidden="true">→</div>
+
+        <div class="step">
+          <div class="step__number">03</div>
+          <div class="step__body">
+            <h3 class="step__title">Study &amp; ask follow-ups</h3>
+            <p class="step__desc">
+              Read, watch, or practise your generated content, then use the AI Tutor
+              chat to go deeper on anything that isn't clear.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA banner ─────────────────────────────────────────────────── -->
+  <section class="cta-banner">
+    <div class="cta-banner__inner">
+      <h2 class="cta-banner__heading">Ready to study smarter?</h2>
+      <p class="cta-banner__sub">
+        Create your free account and start learning in under 60 seconds.
+      </p>
+      <a href="login.html?mode=signup" class="btn btn--primary btn--lg">
+        Create free account →
+      </a>
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__logo">
+        <span class="nav__logo-icon">⚕</span>
+        <span class="nav__logo-name">LearnLense</span>
+      </div>
+      <p class="footer__note">
+        Built for medical students · Content sourced from trusted clinical literature ·
+        School project — not for clinical use
+      </p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
