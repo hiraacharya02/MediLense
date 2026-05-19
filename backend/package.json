@@ -1,0 +1,16 @@
+{
+  "name": "medilense-local-ai-prototype",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.4.0",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.7",
+    "express": "^4.18.3",
+    "openai": "^4.0.0"
+  }
+}

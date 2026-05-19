@@ -1,5 +1,5 @@
 /**
- * LearnLense — script.js
+ * MediLense — script.js
  * Shared across all pages. Detects which page it's on via
  * document.body.dataset.page and runs the right init function.
  *
@@ -10,7 +10,7 @@
  *   4. Login page    (switchAuthTab, handleLogin, handleSignup)
  *   5. Dashboard     (greeting, stats, recent topics, mode selector)
  *   6. Learning tool (handleLearnClick, render, builders)
- *   7. AI API call   ← ADD YOUR KEY HERE WHEN READY
+ *   7. AI API call   ← CONNECTED TO GEMINI LOCAL BACKEND
  *   8. Chat panel
  *   9. Utilities
  */
@@ -21,6 +21,8 @@
 ══════════════════════════════════════════════════════════════════════ */
 
 const PAGE = document.body.dataset.page; // 'landing' | 'login' | 'dashboard'
+
+const API_BASE = "http://localhost:8080";
 
 document.addEventListener('DOMContentLoaded', () => {
   if (PAGE === 'landing')   initLanding();
@@ -203,7 +205,7 @@ function initDashboard() {
   // Show username in nav and welcome heading
   const navName     = document.getElementById('nav-username');
   const welcomeName = document.getElementById('welcome-name');
-  if (navName)     navName.textContent     = user.name;
+  if (navName)      navName.textContent     = user.name;
   if (welcomeName) welcomeName.textContent = user.name;
 
   setGreeting();
@@ -217,7 +219,7 @@ function setGreeting() {
   const el   = document.getElementById('greeting-text');
   if (!el) return;
 
-  if      (hour < 12) el.textContent = 'Good morning';
+  if       (hour < 12) el.textContent = 'Good morning';
   else if (hour < 18) el.textContent = 'Good afternoon';
   else                el.textContent = 'Good evening';
 }
@@ -335,7 +337,7 @@ function saveSession(topic, mode) {
   const lastDay   = localStorage.getItem(STORE.streakDate);
   const streak    = getStreak();
 
-  if      (lastDay === today)     { /* same day, no change */ }
+  if       (lastDay === today)     { /* same day, no change */ }
   else if (lastDay === yesterday) {
     localStorage.setItem(STORE.streakCount, streak + 1);
     localStorage.setItem(STORE.streakDate,  today);
@@ -388,7 +390,7 @@ async function handleLearnClick() {
   showLoadingState();
 
   try {
-    const aiText = await callAI(buildPrompt(topic));
+    const aiText = await callAI(topic, currentMode);
     renderOutput(aiText);
 
     saveSession(topic, currentMode);
@@ -411,11 +413,13 @@ function renderOutput(rawText) {
 
   if (currentMode === 'visual') {
     panel.innerHTML = `<div class="visual-content">${rawText}</div>`;
+    appendTrustedSourcesPanel();
     return;
   }
 
   let parsed;
   try {
+    // Strip markdown JSON fences if Gemini accidentially includes them
     const clean = rawText.replace(/^```[a-z]*\n?/, '').replace(/```$/, '').trim();
     parsed = JSON.parse(clean);
   } catch {
@@ -429,6 +433,30 @@ function renderOutput(rawText) {
     exerciseData    = (parsed.exercises || []).map(e => ({ answer: e.modelAnswer, hint: e.hint }));
     panel.innerHTML = buildKinestheticHTML(parsed.exercises || []);
   }
+
+  appendTrustedSourcesPanel();
+}
+
+function appendTrustedSourcesPanel() {
+  const panel = document.getElementById('output-panel');
+  if (!panel || !lastSources?.length) return;
+
+  const html = `
+    <div class="trusted-sources-panel">
+      <div class="trusted-sources-panel__title">✓ Trusted sources used</div>
+      ${lastSources.map(source => `
+        <div class="trusted-source-item">
+          <strong>${escapeHtml(source.title || 'Approved source')}</strong>
+          <span>${escapeHtml(source.provider || '')} · ${escapeHtml(source.type || '')}</span>
+          <p>${escapeHtml(source.trustReason || '')}</p>
+          ${source.url ? `<a href="${escapeAttr(source.url)}" target="_blank" rel="noopener">Open source</a>` : ''}
+        </div>
+      `).join('')}
+      <p class="trusted-sources-panel__disclaimer">For study support only. Not medical advice, diagnosis, or treatment guidance.</p>
+    </div>
+  `;
+
+  panel.insertAdjacentHTML('beforeend', html);
 }
 
 // ── HTML builders per mode ───────────────────────────────────────────
@@ -522,93 +550,52 @@ function checkAnswer(i) {
 
 
 /* ══════════════════════════════════════════════════════════════════════
-   7. AI API CALL
-   ─────────────────────────────────────────────────────────────────────
-   This is the ONLY function you need to change when adding the AI.
-   Step 1: Paste your Anthropic API key into API_KEY below.
-   Step 2: That's it — everything else is already wired up.
-
-   ⚠️  SECURITY REMINDER:
-       Your API key is visible to anyone who opens DevTools.
-       This is fine for a local school project. Never deploy this online.
+   7. AI API CALL THROUGH LOCAL BACKEND
 ══════════════════════════════════════════════════════════════════════ */
 
-const API_KEY = ''; // ← paste your key here when ready
+let lastSources = [];
 
-// Medical context injected into every prompt
-const MEDICAL_CONTEXT =
-  'You are LearnLense, an AI tutor for medical students. ' +
-  'Only provide information consistent with peer-reviewed medical knowledge ' +
-  '(anatomy, physiology, pharmacology, pathology, clinical medicine). ' +
-  'Never invent sources. Keep content accurate and clinically relevant.';
+async function callAI(topic, mode) {
+  try {
+    const res = await fetch(`${API_BASE}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic, mode })
+    });
 
-async function callAI(prompt) {
-  // ── DEMO MODE — remove this block once you add your API key ──────────
-  if (!API_KEY) {
-    return getDemoContent(currentMode, currentTopic);
+    console.log(`API response status: ${res.status}`);
+
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+
+    const data = await res.json();
+    lastSources = data.sources || [];
+    
+    // FIXED: If data.content is populated, use it (even if data.fallback is true!)
+    if (data.content) {
+      return data.content;
+    }
+    
+    return getDemoContent(mode, topic);
+  } catch (error) {
+    console.warn('AI backend completely unavailable, using local client demo:', error);
+    lastSources = [
+      {
+        title: 'Prototype local fallback mode',
+        provider: 'MediLense demo',
+        type: 'fallback',
+        url: '',
+        trustReason: 'Shown only if the local node server crash-faulted or dropped completely.'
+      }
+    ];
+    return getDemoContent(mode, topic);
   }
-  // ─────────────────────────────────────────────────────────────────────
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type':                              'application/json',
-      'x-api-key':                                 API_KEY,
-      'anthropic-version':                         '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model:      'claude-sonnet-4-20250514',
-      max_tokens: 1200,
-      messages:   [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!res.ok) throw new Error(await res.text());
-
-  const data = await res.json();
-  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
-}
-
-function buildPrompt(topic) {
-  const prompts = {
-    visual: `
-      ${MEDICAL_CONTEXT}
-      The student wants to visually learn about: "${topic}".
-      Write a rich explanation as plain HTML — no code fences, no markdown.
-      Use ONLY: <h3>, <p>, <ul>, <li>, <div class="concept-box">, <span class="key-term">.
-      Structure: 2-sentence clinical overview · Key concepts with <h3> headings ·
-      A clinical analogy · Key facts as <ul>.
-    `,
-    auditory: `
-      ${MEDICAL_CONTEXT}
-      Student wants to watch/listen about: "${topic}".
-      Reply ONLY with raw JSON (no markdown, no backticks).
-      Suggest 2 real YouTube videos from: Osmosis, Ninja Nerd, Armando Hasudungan, Khan Academy Medicine.
-      {"videos":[{"url":"https://www.youtube.com/watch?v=REAL_ID","title":"...","channel":"...","description":"one sentence"}],"listeningGuide":["point 1","point 2","point 3"]}
-    `,
-    reading: `
-      ${MEDICAL_CONTEXT}
-      Student wants to read about: "${topic}".
-      Reply ONLY with raw JSON (no markdown, no backticks).
-      {"article":{"title":"...","body":"para1\\n\\npara2\\n\\npara3","source":"LearnLense Medical Digest"},"furtherReading":[{"title":"...","author":"...","note":"why read this"}]}
-    `,
-    kinesthetic: `
-      ${MEDICAL_CONTEXT}
-      Student wants to practise: "${topic}".
-      Reply ONLY with raw JSON (no markdown, no backticks).
-      Create 4 exercises (clinical reasoning, labelling, recall, problem-solving).
-      {"exercises":[{"title":"short title","prompt":"full task","hint":"helpful hint","modelAnswer":"correct answer"}]}
-    `,
-  };
-  return prompts[currentMode];
 }
 
 
 /* ══════════════════════════════════════════════════════════════════════
-   DEMO CONTENT
-   Shows while there is no API key — so the interface still looks
-   complete and you can present it without needing an API key yet.
+   DEMO CONTENT (Strict Client-Side Offline Backup Only)
 ══════════════════════════════════════════════════════════════════════ */
 
 function getDemoContent(mode, topic) {
@@ -616,8 +603,8 @@ function getDemoContent(mode, topic) {
     return `
       <h3>Overview</h3>
       <p>This is a <span class="key-term">demo preview</span> of the visual mode for
-      <strong>${escapeHtml(topic)}</strong>. Add your Anthropic API key to
-      <code>script.js</code> to generate real medical content.</p>
+      <strong>${escapeHtml(topic)}</strong>. Connect the local backend and add your API key to
+      <code>.env</code> to generate real medical content.</p>
       <h3>How it works</h3>
       <p>When the AI is connected, this section will contain structured clinical
       explanations, key term highlights, and concept boxes generated specifically
@@ -643,7 +630,7 @@ function getDemoContent(mode, topic) {
           url:         'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
           title:       `Demo: ${topic} — Medical Explanation`,
           channel:     'Osmosis (example)',
-          description: 'Add your API key to get real curated YouTube recommendations for this topic.',
+          description: 'Connect the local backend to show approved audio/video recommendations for this topic.',
         },
         {
           url:         'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
@@ -665,7 +652,7 @@ function getDemoContent(mode, topic) {
       article: {
         title:  `Introduction to ${topic}`,
         body:   `This is a demo article for ${topic}. Once you add your API key, a real 350-word clinical article will be generated here.\n\nThe article will cover the core concepts, clinical relevance, and key mechanisms in clear, student-friendly language.\n\nFurther context, case applications, and connections to related topics will also be included.`,
-        source: 'LearnLense Medical Digest (demo)',
+        source: 'MediLense Medical Digest (demo)',
       },
       furtherReading: [
         { title: 'Gray\'s Anatomy',    author: 'Henry Gray',     note: 'The definitive anatomical reference for medical students.' },
@@ -682,7 +669,7 @@ function getDemoContent(mode, topic) {
           title:       'Recall challenge',
           prompt:      `Without looking anything up, write down everything you know about ${topic}. Include mechanisms, clinical relevance, and any related conditions.`,
           hint:        'Start with the basic definition, then add mechanisms, then clinical applications.',
-          modelAnswer: 'This is a demo. Add your API key to get a proper model answer tailored to the topic.',
+          modelAnswer: 'This is a demo. Connect the local backend to get a model answer tailored to the topic.',
         },
         {
           title:       'Clinical reasoning',
@@ -694,7 +681,7 @@ function getDemoContent(mode, topic) {
           title:       'Explain like a teacher',
           prompt:      `Explain ${topic} as if you were teaching it to a fellow student who has never heard of it before.`,
           hint:        'Use an analogy to make it memorable.',
-          modelAnswer: 'This is a demo. Add your API key to see real model answers.',
+          modelAnswer: 'This is a demo. Connect the local backend to see generated model answers.',
         },
         {
           title:       'Connect the concepts',
@@ -725,42 +712,28 @@ async function handleChatSend() {
   appendChatMessage('user', message);
   chatHistory.push({ role: 'user', content: message });
 
-  // Demo mode
-  if (!API_KEY) {
-    const reply = `This is a demo response. Add your API key to get real AI answers about "${currentTopic}".`;
-    chatHistory.push({ role: 'assistant', content: reply });
-    appendChatMessage('ai', reply);
-    return;
-  }
-
   try {
-    const system =
-      `${MEDICAL_CONTEXT} ` +
-      `The student is studying "${currentTopic}" in ${currentMode} mode. ` +
-      `Reply helpfully in 2–3 sentences. Stay medically accurate.`;
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(`${API_BASE}/api/chat`, {
       method: 'POST',
-      headers: {
-        'content-type':                              'application/json',
-        'x-api-key':                                 API_KEY,
-        'anthropic-version':                         '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model:      'claude-sonnet-4-20250514',
-        max_tokens: 400,
-        system,
-        messages:   [...chatHistory],
-      }),
+        topic: currentTopic,
+        mode: currentMode,
+        message,
+        history: chatHistory
+      })
     });
 
-    const data  = await res.json();
-    const reply = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    if (!res.ok) throw new Error(await res.text());
+
+    const data = await res.json();
+    const reply = data.reply || 'I could not generate a response.';
     chatHistory.push({ role: 'assistant', content: reply });
     appendChatMessage('ai', reply);
-  } catch {
-    appendChatMessage('ai', 'Connection issue — please try again.');
+  } catch (error) {
+    const reply = `Backend API Error: Unable to complete your message request right now. Check terminal logs.`;
+    chatHistory.push({ role: 'assistant', content: reply });
+    appendChatMessage('ai', reply);
   }
 }
 
