@@ -242,7 +242,7 @@ Approved audio/video resources:
 ${videoList || "No approved video resources for this topic."}
   `;
 
-  return formatRulesByMode(commonRules, mode);
+  return formatRulesByMode(commonRules, mode, topic);
 }
 
 // --- HELPER FUNCTION: PROMPT BUILDER FOR UNAPPROVED TOPICS ---
@@ -266,10 +266,23 @@ ${topic}
 }
 
 // Extracted schema formatter to reuse rules logic for both paths cleanly
-function formatRulesByMode(commonRules, mode) {
-  if (mode === "visual") {
+function formatRulesByMode(commonRules, mode, topicObj = null) {
+if (mode === "visual") {
+    let imageInjectionRule = "";
+
+    // Check if this is the cardiac cycle and contains images
+    if (topicObj && topicObj.id === "cardiac-cycle" && topicObj.images?.length) {
+      imageInjectionRule = `
+CRITICAL EXTRA VISUAL RULE:
+You MUST incorporate the following images directly inside the HTML structure. Place them right below the matching text sections using standard <img> tags.
+- Image 1 (Systole context): <img src="${topicObj.images[0].url}" alt="${topicObj.images[0].alt}" class="study-image" />
+- Image 2 (Diastole context): <img src="${topicObj.images[1].url}" alt="${topicObj.images[1].alt}" class="study-image" />
+      `;
+    }
+
     return `
 ${commonRules}
+${imageInjectionRule}
 
 Return plain HTML only. Do not wrap it in markdown code blocks or code fences.
 
