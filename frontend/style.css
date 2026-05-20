@@ -906,35 +906,49 @@ body {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: .4rem .2rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  gap: .5rem .35rem;
+  background:
+    linear-gradient(135deg, rgba(56,189,248,.055), rgba(129,140,248,.035)),
+    var(--surface);
+  border: 1px solid rgba(56,189,248,.16);
   border-radius: var(--r-lg);
-  padding: .85rem 1.25rem;
+  padding: .8rem 1.15rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
 }
 
 .step-guide__item {
   display: flex;
   align-items: center;
-  gap: .45rem;
-  font-size: .78rem;
-  color: var(--text-soft);
+  gap: .5rem;
+  font-family: var(--font-display);
+  font-size: .76rem;
+  font-weight: 700;
+  color: #dbeafe;
+  letter-spacing: .01em;
+  white-space: nowrap;
 }
 
 .step-guide__number {
-  width: 18px; height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: var(--border);
-  color: var(--text);
-  font-size: .6rem;
-  font-weight: 700;
+  background: rgba(56,189,248,.12);
+  border: 1px solid rgba(56,189,248,.34);
+  color: var(--blue);
+  font-size: .62rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.step-guide__divider { color: var(--border); font-size: .75rem; padding: 0 .15rem; }
+.step-guide__divider {
+  color: rgba(56,189,248,.42);
+  font-size: .8rem;
+  font-weight: 800;
+  padding: 0 .2rem;
+}
 
 /* Search bar */
 .search-bar {
@@ -1706,143 +1720,7 @@ body {
   font-weight: 800;
   margin-bottom: 1rem;
 }
-/* ─────────────────────────────────────────────
-   NEW DASHBOARD STEP GUIDE — paste at bottom
-───────────────────────────────────────────── */
 
-.step-guide {
-  background:
-    linear-gradient(135deg, rgba(56,189,248,.07), rgba(129,140,248,.045)),
-    var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  padding: 1.15rem;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, .12);
-
-  /* overrides old step-guide layout */
-  display: block;
-  list-style: none;
-}
-
-.step-guide__header {
-  margin-bottom: 1rem;
-}
-
-.step-guide__eyebrow {
-  display: inline-block;
-  color: var(--teal);
-  font-family: var(--font-display);
-  font-size: .68rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  margin-bottom: .25rem;
-}
-
-.step-guide__title {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: -.2px;
-  color: var(--text);
-}
-
-.step-guide__list {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: .75rem;
-}
-
-.step-guide__item {
-  position: relative;
-  background: rgba(15, 23, 41, .75);
-  border: 1px solid rgba(42, 58, 94, .85);
-  border-radius: var(--r-lg);
-  padding: .95rem;
-  min-height: 130px;
-  overflow: hidden;
-  transition: transform var(--t), border-color var(--t), background var(--t);
-
-  /* overrides old flex style */
-  display: block;
-}
-
-.step-guide__item:hover {
-  transform: translateY(-2px);
-  border-color: rgba(56,189,248,.42);
-  background: rgba(22, 31, 54, .88);
-}
-
-.step-guide__number {
-  position: absolute;
-  top: .75rem;
-  right: .85rem;
-  font-family: var(--font-display);
-  font-size: .72rem;
-  font-weight: 800;
-  color: rgba(232, 237, 245, .28);
-
-  /* overrides old circle number */
-  width: auto;
-  height: auto;
-  border-radius: 0;
-  background: transparent;
-}
-
-.step-guide__icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(56,189,248,.09);
-  border: 1px solid rgba(56,189,248,.18);
-  font-size: 1.1rem;
-  margin-bottom: .7rem;
-}
-
-.step-guide__item strong {
-  display: block;
-  color: var(--text);
-  font-family: var(--font-display);
-  font-size: .83rem;
-  font-weight: 800;
-  margin-bottom: .25rem;
-}
-
-.step-guide__item p {
-  color: var(--text-muted);
-  font-size: .74rem;
-  line-height: 1.45;
-}
-
-/* Hide old arrow dividers if any remain */
-.step-guide__divider {
-  display: none;
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-  .step-guide__list {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 520px) {
-  .step-guide {
-    padding: 1rem;
-  }
-
-  .step-guide__list {
-    grid-template-columns: 1fr;
-  }
-
-  .step-guide__item {
-    min-height: auto;
-  }
-}
 
 @media (max-width: 1050px) {
   .pricing-grid {
