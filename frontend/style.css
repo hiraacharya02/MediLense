@@ -1539,6 +1539,20 @@ body {
   margin-bottom: .75rem;
 }
 
+.trusted-sources-panel__title.context-unapproved {
+  color: #dc3545; 
+  font-weight: bold;
+}
+
+.text-danger {
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.panel-unapproved-border {
+  border-color: #dc3545 !important;
+}
+
 .trusted-source-item {
   border-top: 1px solid rgba(45,212,191,.16);
   padding-top: .7rem;
@@ -1736,4 +1750,27 @@ body {
   .pricing-grid {
     grid-template-columns: 1fr;
   }
+}
+.chat-caution-msg {
+  color: #dc3545;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-top: 8px;
+  border-top: 1px dashed rgba(220, 53, 69, 0.3);
+  padding-top: 6px;
+}
+
+.bubble-unapproved-state {
+  background-color: #fff8f8 !important;
+  border: 1px solid rgba(220, 53, 69, 0.25) !important;
+}
+
+.study-image {
+  display: block;
+  max-width: 100%;  
+  height: auto;         
+  margin: 20px auto;     
+  border-radius: 8px;    
+  border: 1px solid #e2e8f0; 
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }

@@ -3,6 +3,10 @@ export const approvedContent = [
     id: "cardiac-cycle",
     title: "Cardiac Cycle",
     keywords: ["cardiac cycle", "heart cycle", "systole", "diastole", "heart"],
+    images: [
+      { url: "/images/cardiac1.jpeg", alt: "Heart during Systole contraction phase" },
+      { url: "/images/cardiac2.jpeg", alt: "Heart during Diastole relaxation phase" }
+    ],
     approvedText: `
 The cardiac cycle is the sequence of events that happens during one heartbeat.
 It includes diastole, when the heart muscle relaxes and the chambers fill with blood, and systole, when the heart muscle contracts and pumps blood.

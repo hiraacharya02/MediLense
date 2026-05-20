@@ -9,7 +9,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const MODEL = process.env.GEMINI_MODEL; 
+const MODEL = process.env.GEMINI_MODEL;
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY
@@ -44,20 +44,58 @@ app.post("/api/generate", async (req, res) => {
 
   const approvedTopic = findApprovedTopic(topic);
 
+  console.log(`Approved topic found: ${approvedTopic ? approvedTopic.title : "None"}`);
+
+  //  IF TOPIC IS NOT FOUND IN APPROVED CONTENT ---
   if (!approvedTopic) {
-    return res.json({
-      fallback: true,
-      content: buildUnknownTopicFallback(topic, mode),
-      sources: [{
-        title: "Prototype approved topic library",
-        provider: "MediLense local library",
-        type: "local approved source list",
-        url: "",
-        trustReason: "The prototype only contains approved content for cardiac cycle, diabetes basics, and respiratory system."
-      }]
-    });
+    if (!process.env.GEMINI_API_KEY) {
+      return res.json({
+        fallback: true,
+        content: buildUnknownTopicFallback(topic, mode),
+        sources: []
+      });
+    }
+
+    try {
+      const prompt = buildUnapprovedAIPrompt(topic, mode);
+
+      console.log("Generated prompt for unapproved topic:", prompt);
+
+      const response = await ai.models.generateContent({
+        model: MODEL,
+        contents: prompt,
+        config: {
+          maxOutputTokens: 1200,
+          responseMimeType: mode !== "visual" ? "application/json" : "text/plain"
+        }
+      });
+
+      // Return generated text and append a custom notice/warning
+      return res.json({
+        fallback: false,
+        content: response.text,
+        sources: [{
+          title: "AI Dynamic Generation",
+          provider: "Google Gemini Model",
+          type: "Unapproved/Generated Source",
+          url: "",
+          trustReason: "Caution: text generated with ai because the topic was not found in approved content."
+        }],
+        warning: "Caution: text generated with ai because the topic was not found in approved content."
+      });
+
+    } catch (error) {
+      console.error("Gemini unapproved generation error:", error?.message || error);
+      return res.json({
+        fallback: true,
+        content: buildUnknownTopicFallback(topic, mode),
+        sources: [],
+        warning: "AI generation failed for this unapproved topic."
+      });
+    }
   }
 
+  // TOPIC IS FOUND IN APPROVED CONTENT ---
   if (!process.env.GEMINI_API_KEY) {
     return res.json({
       fallback: true,
@@ -74,13 +112,13 @@ app.post("/api/generate", async (req, res) => {
       contents: prompt,
       config: {
         maxOutputTokens: 1200,
-        responseMimeType: mode !== "visual" ? "application/json" : "text/html"
+        responseMimeType: mode !== "visual" ? "application/json" : "text/plain"
       }
     });
 
     res.json({
       fallback: false,
-      content: response.text, 
+      content: response.text,
       sources: approvedTopic.sources
     });
   } catch (error) {
@@ -105,17 +143,19 @@ app.post("/api/chat", async (req, res) => {
   const approvedTopic = findApprovedTopic(topic);
   const hasKey = Boolean(process.env.GEMINI_API_KEY);
 
-  if (!approvedTopic || !hasKey) {
+  if (!hasKey) {
     return res.json({
       fallback: true,
-      reply: `For the prototype, I can only answer from the approved MediLense topic library. Try one of: cardiac cycle, diabetes basics, or respiratory system.`
+      reply: "I cannot access the AI engine right now. Please check your configuration."
     });
   }
 
   try {
-    const response = await ai.models.generateContent({
-      model: MODEL,
-      contents: `
+    let systemPrompt = "";
+
+    // --- DETERMINE SYSTEM INSTRUCTIONS BASED ON APPROVAL ---
+    if (approvedTopic) {
+      systemPrompt = `
 You are MediLense, a study-support AI tutor for medical students.
 
 Rules:
@@ -130,21 +170,41 @@ Student question: ${message}
 
 Approved source material:
 ${approvedTopic.approvedText}
-      `,
-      config: {
-        maxOutputTokens: 350
-      }
+      `;
+    } else {
+  
+      systemPrompt = `
+You are MediLense, a study-support AI tutor for medical students.
+
+Rules:
+- This topic is NOT in our pre-approved library files. Answer the question using your general medical knowledge base.
+- Do not diagnose, prescribe, or give personal medical advice.
+- Keep the answer to 2–4 beginner-friendly sentences.
+
+Current topic requested: ${topic}
+Learning mode: ${mode}
+Student question: ${message}
+      `;
+    }
+
+    const response = await ai.models.generateContent({
+      model: MODEL,
+      contents: systemPrompt
     });
 
     res.json({
       fallback: false,
-      reply: response.text
+      reply: response.text,
+      isApprovedTopic: Boolean(approvedTopic) 
     });
+
   } catch (error) {
     console.error("Gemini chat error:", error?.message || error);
     res.json({
       fallback: true,
-      reply: `I had trouble connecting to the AI, but your approved topic is "${approvedTopic.title}". Review the trusted source card below the study output.`
+      reply: approvedTopic 
+        ? `I had trouble connecting to the AI, but your approved topic is "${approvedTopic.title}". Review the trusted source card below the study output.`
+        : `I encountered an engine issue processing this unapproved topic.`
     });
   }
 });
@@ -182,9 +242,47 @@ Approved audio/video resources:
 ${videoList || "No approved video resources for this topic."}
   `;
 
-  if (mode === "visual") {
+  return formatRulesByMode(commonRules, mode, topic);
+}
+
+// --- HELPER FUNCTION: PROMPT BUILDER FOR UNAPPROVED TOPICS ---
+function buildUnapprovedAIPrompt(topic, mode) {
+  const commonRules = `
+You are MediLense, an AI study assistant for medical students.
+
+This topic was not found in our pre-approved static local library files, so you must use your general medical knowledge base to generate the lesson plan.
+
+Very important rules:
+- Provide accurate, baseline medical knowledge regarding the topic: "${topic}".
+- Do NOT invent random URLs or fake specific clinical trials.
+- Do NOT give a direct diagnosis, prescription, or personal medical advice to an individual.
+- Keep the tone highly educational, clear, and beginner-friendly for a medical student.
+
+Topic to generate from your knowledge base:
+${topic}
+  `;
+
+  return formatRulesByMode(commonRules, mode);
+}
+
+// Extracted schema formatter to reuse rules logic for both paths cleanly
+function formatRulesByMode(commonRules, mode, topicObj = null) {
+if (mode === "visual") {
+    let imageInjectionRule = "";
+
+    // Check if this is the cardiac cycle and contains images
+    if (topicObj && topicObj.id === "cardiac-cycle" && topicObj.images?.length) {
+      imageInjectionRule = `
+CRITICAL EXTRA VISUAL RULE:
+You MUST incorporate the following images directly inside the HTML structure. Place them right below the matching text sections using standard <img> tags.
+- Image 1 (Systole context): <img src="${topicObj.images[0].url}" alt="${topicObj.images[0].alt}" class="study-image" />
+- Image 2 (Diastole context): <img src="${topicObj.images[1].url}" alt="${topicObj.images[1].alt}" class="study-image" />
+      `;
+    }
+
     return `
 ${commonRules}
+${imageInjectionRule}
 
 Return plain HTML only. Do not wrap it in markdown code blocks or code fences.
 
@@ -208,15 +306,14 @@ Create:
 ${commonRules}
 
 Return raw JSON only. Do not wrap it in markdown code blocks or code fences.
-Use ONLY the approved video resources listed above. Do not invent YouTube links.
 
 Required JSON shape:
 {
   "videos": [
     {
-      "url": "approved URL only",
-      "title": "approved or source-based title",
-      "channel": "provider/channel",
+      "url": "Provide a placeholder string or relevant general link structural pattern since no specific resource was pre-approved",
+      "title": "Descriptive video title related to the topic",
+      "channel": "Medical Education Resource",
       "description": "one sentence explaining why it helps"
     }
   ],
@@ -240,13 +337,13 @@ Required JSON shape:
   "article": {
     "title": "short title",
     "body": "3 short paragraphs separated by \\n\\n",
-    "source": "MediLense approved source library"
+    "source": "MediLense AI Knowledge Engine"
   },
   "furtherReading": [
     {
-      "title": "source title",
-      "author": "source/provider",
-      "note": "why it is useful"
+      "title": "Standard core reference text for this system (e.g. standard textbooks)",
+      "author": "Relevant typical clinical publisher",
+      "note": "why this standard reference helps"
     }
   ]
 }
@@ -264,9 +361,9 @@ Required JSON shape:
   "exercises": [
     {
       "title": "short title",
-      "prompt": "hands-on study task based only on approved text",
+      "prompt": "hands-on study task based on standard understanding",
       "hint": "helpful hint",
-      "modelAnswer": "safe model answer based only on approved text"
+      "modelAnswer": "safe model answer based on medical facts"
     }
   ]
 }

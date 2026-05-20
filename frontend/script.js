@@ -441,14 +441,24 @@ function appendTrustedSourcesPanel() {
   const panel = document.getElementById('output-panel');
   if (!panel || !lastSources?.length) return;
 
+  // Check if any source in the list is an unapproved/generated source
+  const isUnapproved = lastSources.some(source => source.type === "Unapproved/Generated Source");
+
+  // Dynamically set the panel header layout based on approval state
+  const panelHeader = isUnapproved 
+    ? `<div class="trusted-sources-panel__title context-unapproved">✗ Trusted sources not used</div>`
+    : `<div class="trusted-sources-panel__title">✓ Trusted sources used</div>`;
+
   const html = `
-    <div class="trusted-sources-panel">
-      <div class="trusted-sources-panel__title">✓ Trusted sources used</div>
+    <div class="trusted-sources-panel ${isUnapproved ? 'panel-unapproved-border' : ''}">
+      ${panelHeader}
       ${lastSources.map(source => `
         <div class="trusted-source-item">
           <strong>${escapeHtml(source.title || 'Approved source')}</strong>
           <span>${escapeHtml(source.provider || '')} · ${escapeHtml(source.type || '')}</span>
-          <p>${escapeHtml(source.trustReason || '')}</p>
+          <p class="${source.type === 'Unapproved/Generated Source' ? 'text-danger' : ''}">
+            ${escapeHtml(source.trustReason || '')}
+          </p>
           ${source.url ? `<a href="${escapeAttr(source.url)}" target="_blank" rel="noopener">Open source</a>` : ''}
         </div>
       `).join('')}
@@ -729,7 +739,8 @@ async function handleChatSend() {
     const data = await res.json();
     const reply = data.reply || 'I could not generate a response.';
     chatHistory.push({ role: 'assistant', content: reply });
-    appendChatMessage('ai', reply);
+    
+    appendChatMessage('ai', reply, data.isApprovedTopic);
   } catch (error) {
     const reply = `Backend API Error: Unable to complete your message request right now. Check terminal logs.`;
     chatHistory.push({ role: 'assistant', content: reply });
@@ -737,16 +748,32 @@ async function handleChatSend() {
   }
 }
 
-function appendChatMessage(sender, text) {
+function appendChatMessage(sender, text, isApprovedTopic) {
   const container = document.getElementById('chat-messages');
   if (!container) return;
+
   const el = document.createElement('div');
-  el.className  = 'chat-message chat-message--' + (sender === 'user' ? 'user' : 'ai');
-  el.textContent = text;
+  
+  // Apply our baseline layout classes, adding a custom warning modifier block if unapproved
+  if (sender === 'ai' && isApprovedTopic === false) {
+    el.className = 'chat-message chat-message--ai chat-message--unapproved';
+    
+    // Build out safe HTML block structure incorporating the caution banner
+    el.innerHTML = `
+      <div class="chat-message-text">${escapeHtml(text)}</div>
+      <div class="chat-caution-msg">
+        ✗ Caution: text generated with ai because the topic was not found in approved content.
+      </div>
+    `;
+  } else {
+    // Normal routing layout fallback for standard user or verified AI messages
+    el.className = 'chat-message chat-message--' + (sender === 'user' ? 'user' : 'ai');
+    el.textContent = text;
+  }
+
   container.appendChild(el);
   container.scrollTop = container.scrollHeight;
 }
-
 
 /* ══════════════════════════════════════════════════════════════════════
    9. UTILITIES
