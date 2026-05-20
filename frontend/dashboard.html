@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="images/medilense_favicon.png">
   <title>MediLense — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -15,7 +16,7 @@
     <div class="nav__inner">
 
       <a href="index.html" class="nav__logo">
-        <span class="nav__logo-icon">⚕</span>
+        <span class="nav__logo-icon"><img src="images/medilense_favicon.png" type="image/png" alt="MediLense logo"/></span>
         <span class="nav__logo-name">MediLense</span>
       </a>
 
@@ -27,12 +28,17 @@
       </div>
 
       <div class="nav__right">
-        <span id="nav-streak" class="nav-streak" hidden></span>
-        <div class="nav-user">
-          <span id="nav-username" class="nav-user__name">Student</span>
-          <button class="btn btn--ghost btn--sm" onclick="handleLogout()">Log out</button>
-        </div>
-      </div>
+  <span id="nav-streak" class="nav-streak" hidden></span>
+
+  <a href="pricing.html" class="premium-btn">
+    Go Premium
+  </a>
+
+  <div class="nav-user">
+    <span id="nav-username" class="nav-user__name">Student</span>
+    <button class="btn btn--ghost btn--sm" onclick="handleLogout()">Log out</button>
+  </div>
+</div>
 
     </div>
   </nav>
@@ -93,27 +99,44 @@
     <section class="learn-tool" aria-label="Learning tool">
 
       <!-- Step guide -->
-      <ol class="step-guide" aria-label="How to use">
-        <li class="step-guide__item">
-          <span class="step-guide__number">1</span>
-          <span>Enter a medical topic</span>
-        </li>
-        <li class="step-guide__divider" aria-hidden="true">→</li>
-        <li class="step-guide__item">
-          <span class="step-guide__number">2</span>
-          <span>Choose your learning style</span>
-        </li>
-        <li class="step-guide__divider" aria-hidden="true">→</li>
-        <li class="step-guide__item">
-          <span class="step-guide__number">3</span>
-          <span>Click Learn</span>
-        </li>
-        <li class="step-guide__divider" aria-hidden="true">→</li>
-        <li class="step-guide__item">
-          <span class="step-guide__number">4</span>
-          <span>Study &amp; explore</span>
-        </li>
-      </ol>
+<section class="step-guide" aria-label="How to use MediLense">
+
+  <div class="step-guide__header">
+    <span class="step-guide__eyebrow">Study workflow</span>
+    <h2 class="step-guide__title">Start your AI-guided study session</h2>
+  </div>
+
+  <ol class="step-guide__list">
+    <li class="step-guide__item">
+      <span class="step-guide__number">01</span>
+      <span class="step-guide__icon">🔎</span>
+      <strong>Enter a topic</strong>
+      <p>Search a medical concept from the approved library.</p>
+    </li>
+
+    <li class="step-guide__item">
+      <span class="step-guide__number">02</span>
+      <span class="step-guide__icon">🎛️</span>
+      <strong>Choose a mode</strong>
+      <p>Select visual, auditory, reading, or test yourself.</p>
+    </li>
+
+    <li class="step-guide__item">
+      <span class="step-guide__number">03</span>
+      <span class="step-guide__icon">✨</span>
+      <strong>Generate material</strong>
+      <p>Let AI transform trusted content into your format.</p>
+    </li>
+
+    <li class="step-guide__item">
+      <span class="step-guide__number">04</span>
+      <span class="step-guide__icon">📚</span>
+      <strong>Study and ask</strong>
+      <p>Review the answer, sources, and follow up with the tutor.</p>
+    </li>
+  </ol>
+
+</section>
 
       <!-- Search bar -->
       <div class="search-bar">
@@ -152,8 +175,8 @@
         </button>
 
         <button id="mode-btn-kinesthetic" class="mode-btn" role="tab" aria-selected="false" onclick="setMode('kinesthetic')">
-          <span class="mode-btn__icon">⚙️</span>
-          <span class="mode-btn__label">Kinesthetic</span>
+          <span class="mode-btn__icon">📝</span>
+          <span class="mode-btn__label">Test Yourself</span>
           <span class="mode-btn__hint">Learn by doing</span>
         </button>
 
